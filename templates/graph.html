@@ -1,0 +1,191 @@
+<html>
+<head>
+    <title>Граф для {{ origin['title'] }}</title>
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.25.0/cytoscape.min.js'></script>
+    <script src="https://unpkg.com/layout-base/layout-base.js"></script>
+    <script src="https://unpkg.com/cose-base/cose-base.js"></script>
+    <script src="https://unpkg.com/cytoscape-fcose/cytoscape-fcose.js"></script>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<style>
+    #cy {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        top: 0px;
+        left: 0px;
+    }
+</style>
+
+<body>
+    <div id="cy"></div>
+    <img src="/static/img/logo.png" class="logo">
+    <div class="yearbar" style="">
+        <span>{{minyear}}</span>
+        <span>{{maxyear}}</span>
+    </div>
+    <div class="right-panel">
+        <div><span id="title">{{ origin['title'] }}</span></div>
+        <span class="popup" data-popuptext="Источник"><a href="https://www.semanticscholar.org/paper/{{origin['paperId']}}" id="article_link" target="_blank"><img src="/static/img/data-source.png" width="32" height="32"></a></span>
+        <span class="popup" data-popuptext="Построить граф"><a href="/graph/{{origin['paperId']}}" id="build_graph"><img src="/static/img/graph.png" width="32" height="32"></a></span>
+        <div><span id="authors">{% for author in origin['authors'] %} {{author['name']}} {% endfor %}</span></div>
+        <div>Год: <span id="year">{% if origin['year'] %} {{origin['year']}} {% endif %}</span></div>
+        <div><span id="fields">{% if origin['fieldsOfStudy'] %} {% for field in origin['fieldsOfStudy'] %} <span>{{field}}</span> {% endfor %} {% endif %}</span></div>
+        <div>Цитирования: <span id="ncitations">{{ origin['citationCount'] }}</span></div>
+        <div><span id="abstract">{% if origin['abstract'] %} {{origin['abstract'].replace("\\u", "").replace("`", "'")}} {% endif %}</span></div>
+    </div>
+
+    <script>
+        let origin =  {id: '{{origin['paperId']}}',
+                       title: '{{origin['title'].replace("\n", "")}}',
+                       citationCount: {{origin['citationCount']}},
+                       year: {% if origin['year'] %} {{origin['year']}} {% else %} '' {% endif %},
+                       fields: {% if origin['fieldsOfStudy'] %} [{% for field in origin['fieldsOfStudy'] %} '{{field}}', {% endfor %}] {% else %} [] {% endif %},
+                       abstract: {% if origin['abstract'] %} `{{origin['abstract'].replace("\\u", "").replace("`", "'").replace("\n", "").replace("${", '')}}` {% else %} '' {% endif %},
+                       authors: [{% for author in origin['authors'] %} '{{author['name']}}', {% endfor %}], };
+        let graphElements = {
+            nodes: [
+            {% for article in articles %}
+                {data:
+                    {id: '{{article['paperId']}}',
+                    title: '{{article['title'].replace("\n", "")}}',
+                    citationCount: {{article['citationCount']}},
+                    year: {% if article['year'] %} {{article['year']}} {% else %} '' {% endif %},
+                    fields: {% if article['fieldsOfStudy'] %} [{% for field in article['fieldsOfStudy'] %} '{{field}}', {% endfor %}] {% else %} [] {% endif %},
+                    abstract: {% if article['abstract'] %} `{{article['abstract'].replace("\\u", "").replace("`", "'").replace("\n", "").replace("${", '')}}` {% else %} '' {% endif %},
+                    authors: [{% for author in article['authors'] %} '{{author['name']}}', {% endfor %}],} },
+            {% endfor %}
+            ],
+            edges: [
+                {% for edge in edges %}
+                    {data: {id: '{{edge[0] + edge[1]}}', source: '{{edge[0]}}', target: '{{edge[1]}}' } },
+                {% endfor %}
+            ]
+        }
+        let cy = cytoscape({
+    container: document.getElementById('cy'),
+    elements: graphElements,
+    wheelSensitivity: 0.1,
+    layout :{name: 'circle',   idealEdgeLength: edge => 500, radius: 1000},
+    style: [
+      {
+        selector: 'node',
+        style: {
+          'label': 'data(title)',
+          'width': 'mapData(citationCount,0,500,200,400)',
+          'height': 'mapData(citationCount,0,500,200,400)',
+          'font-size': '50px',
+          'font-family': 'system-ui',
+          'background-color': 'mapData(year,{{ minyear }},{{ maxyear }},#AAA, blue)',
+          'text-wrap': 'wrap',
+          'text-max-width': '800px',
+        }
+      }, {
+        selector: 'edge',
+        style: {
+            'width': '1px',
+        }
+      },
+      {
+            selector: 'node.highlight',
+            style: {
+                'border-color': 'black',
+                'border-width': '2px'
+            }
+        },
+        {
+            selector: 'node.semitransp',
+            style:{ 'opacity': '0.5' }
+        },
+        {
+            selector: 'edge.highlight',
+            style: { 'width': '2px','line-color' : 'black', }
+        },
+        {
+            selector: 'edge.semitransp',
+            style:{ 'opacity': '0.2' }
+        },
+        {
+            selector: 'node.active',
+            style: {
+                'border-color': 'black',
+                'border-width': '4px'
+            }
+        },
+        {
+            selector: 'edge.active',
+            style: {
+                'line-color' : 'black',
+                'width': '4px',
+            }
+        },
+        {
+            selector: 'node.tapped',
+            style: {
+                'font-size': '50px',
+            }
+        },
+    ]
+  });
+  cy.layout({name: 'circle',   idealEdgeLength: edge => 500, radius: 1000, startAngle: -1/3 * Math.PI, animate: true}).run();
+  cy.elements().getElementById(origin['id']).style('shape', 'octagon');
+  let main = cy.elements().getElementById(origin['id']);
+  cy.on('mouseover', 'node', function(e){
+    var sel = e.target;
+
+
+    document.getElementById("title").innerHTML = sel.data()['title'];
+    document.getElementById("authors").innerHTML = sel.data()['authors'].join(" ");
+    document.getElementById("year").innerHTML = sel.data()['year'];
+    document.getElementById("ncitations").innerHTML = sel.data()['citationCount'];
+    document.getElementById("abstract").innerHTML = sel.data()['abstract'];
+    document.getElementById("fields").innerHTML = sel.data()['fields'].join(", ");
+    document.getElementById("article_link").href = "https://www.semanticscholar.org/paper/" + sel.data()['id'];
+    document.getElementById("build_graph").href = "/graph/" + sel.data()['id'];
+
+
+    cy.elements().difference(sel.incomers().union(sel.outgoers())).not(sel).addClass('semitransp');
+    sel.addClass('highlight').incomers().union(sel.outgoers()).addClass('highlight');
+});
+  cy.on('mouseout', 'node', function(e){
+    var sel = e.target;
+
+
+    document.getElementById("title").innerHTML = main.data()['title'];
+    document.getElementById("authors").innerHTML = main.data()['authors'].join(" ");
+    document.getElementById("year").innerHTML = main.data()['year'];
+    document.getElementById("ncitations").innerHTML = main.data()['citationCount'];
+    document.getElementById("abstract").innerHTML = main.data()['abstract'];
+    document.getElementById("fields").innerHTML = main.data()['fields'].join(", ");
+    document.getElementById("article_link").href = "https://www.semanticscholar.org/paper/" + main.data()['id'];
+    document.getElementById("build_graph").href = "/graph/" + main.data()['id'];
+
+
+    cy.elements().removeClass('semitransp');
+    sel.removeClass('highlight').incomers().union(sel.outgoers()).removeClass('highlight');
+
+});
+
+  cy.on('tap', 'node', function(e){
+    var sel = e.target;
+
+
+    document.getElementById("title").innerHTML = sel.data()['title'];
+    document.getElementById("authors").innerHTML = sel.data()['authors'].join(" ");
+    document.getElementById("year").innerHTML = sel.data()['year'];
+    document.getElementById("ncitations").innerHTML = sel.data()['citationCount'];
+    document.getElementById("abstract").innerHTML = sel.data()['abstract'];
+    document.getElementById("fields").innerHTML = sel.data()['fields'].join(", ");
+    document.getElementById("article_link").href = "https://www.semanticscholar.org/paper/" + sel.data()['id'];
+    document.getElementById("build_graph").href = "/graph/" + sel.data()['id'];
+    main = sel;
+
+    if (sel.hasClass("tapped")) {sel.removeClass("tapped");sel.incomers().union(sel.outgoers()).removeClass("active");return;}
+    cy.elements().removeClass("active").removeClass("tapped");
+    sel.addClass('tapped').incomers().union(sel.outgoers()).addClass('active');
+});
+    </script>
+</body>
+</html>

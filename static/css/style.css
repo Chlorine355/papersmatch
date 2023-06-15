@@ -1,0 +1,190 @@
+@font-face {
+  font-family: "Grafik";
+  font-style: normal;
+  font-weight: 400;
+  src: url("/static/Myriad.ttf");
+}
+
+.right-panel {
+    position: fixed;
+    width: 300px;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    overflow-y: scroll;
+    padding: 10px;
+    border-left: 1px solid black;
+    background-color: #eaf8ff; // #EEF9FF
+}
+
+body, #cy {
+    background-color: white; //#EEF9FF
+}
+
+.right-panel > * {
+    padding-bottom: 7px;
+}
+
+.right-panel a {
+    padding-right: 10px;
+}
+
+.result > * {
+padding-bottom: 7px;
+}
+
+
+* {
+    font-family: "Grafik", 'system-ui';
+}
+
+#title {
+    font-size: 1.4rem;
+}
+
+
+span.popup {
+  height: 0;
+  color: #fff;
+  position: relative;
+  cursor: pointer;
+
+  &:after {
+    content: attr(data-popuptext);
+    background: rgba(0, 0, 0, 0.85);
+    border-radius: 3px;
+    opacity: 0;
+    top: 0;
+    left: 0;
+    position: absolute;
+    transition: 100ms ease;
+    white-space: nowrap;
+    max-height: 0;
+  }
+
+  &:hover:after {
+    opacity: 1;
+    top: 1.2em;
+    max-height: 200px;
+    padding: .4em;
+  }
+}
+
+.logo {
+    position: fixed;
+    top: 10;
+    left: 10;
+    width: 228px;
+}
+
+.yearbar {
+    width: 150px;
+    position: absolute;
+    height: 20px;
+    background: linear-gradient(90deg, #AAA 0%, blue 100%);
+    right: 340px;
+    bottom: 40px;
+}
+
+.yearbar span:first-child {
+    position: absolute;
+    left: 0;
+    bottom: -20px;
+}
+
+.yearbar span:last-child {
+    position: absolute;
+    right: 0;
+    top: -20px;
+}
+
+.search-results {
+    width: 600px;
+    padding-top: 100px;
+    margin: 0 auto;
+}
+
+.result {
+    box-shadow: 0px 0px 6px 3px rgba(0,0,0,0.5);
+    padding: 20px;
+    margin-bottom:20px;
+    background-color: white;
+    border-radius: 7px;
+}
+
+.result .title a {
+    font-size: larger;
+    color: #12ABDB;
+    }
+
+
+a {
+    text-decoration: none!important;
+}
+
+a:visited {
+    color: darkviolet!important;
+}
+
+div.abstract {
+   -webkit-mask-image: linear-gradient(rgb(0, 0, 0) 50%, transparent);
+    max-height: 100px;
+    overflow: hidden
+}
+
+.results-caption {
+    font-size: 40px;
+    color: #12ABDB;
+    font-weight: 500;
+    padding-bottom: 20px;
+}
+
+#search {
+    width: 100%;
+    height: 40px;
+    border-radius: 10px;
+    padding-left: 10px;
+    margin-bottom: 20px;
+    border-radius: 100px
+}
+
+#search:active {
+    border-color:  #12ABDB;
+}
+
+.searchbar {
+    position: relative;
+}
+
+#sbutton {
+    border-radius: 0 100px 100px 0;
+    padding: 8px;
+    border: 2px solid black;
+    background-color: rgb(255, 190, 255);
+    width: 100px;
+    height: 40px;
+    position: absolute;
+    right: 0;
+    cursor: pointer;
+}
+
+.welcome {
+    font-size: 20px;
+    text-align: center;
+    padding-bottom: 0;
+    padding-top: 50px;
+    overflow-x: visible;
+    display: flex;
+    padding-bottom: 60px;
+}
+
+.welcome span {
+
+    font-size: 37px;
+    text-align: center;
+
+}
+
+.subtext {
+    text-align: center;
+}

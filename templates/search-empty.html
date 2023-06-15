@@ -1,0 +1,38 @@
+<html>
+<head>
+    <title>PapersMatch</title>
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.25.0/cytoscape.min.js'></script>
+    <script src="https://unpkg.com/layout-base/layout-base.js"></script>
+    <script src="https://unpkg.com/cose-base/cose-base.js"></script>
+    <script src="https://unpkg.com/cytoscape-fcose/cytoscape-fcose.js"></script>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<body>
+    <img src="/static/img/logo.png" class="logo">
+
+    <div class="search-results">
+        <div class="welcome">
+            <span>Добро пожаловать на PapersMatch - платформу, которая поможет вам быстро и легко найти релевантные статьи и исследования.</span>
+        </div>
+        <div class="searchbar">
+                <input type="text" id="search" placeholder="Статья, книга, автор, тема...">
+            <button id="sbutton">Найти</button>
+        </div>
+        <div class="subtext">Присоединяйтесь к PapersMatch и откройте мир знаний!</div>
+    </div>
+    <script>
+        let sb = document.getElementById("search");
+        let btn = document.getElementById("sbutton");
+        btn.onclick = function () {
+            window.location.href = '/' + sb.value;
+        }
+        sb.addEventListener('keydown', function(e) {
+    if (e.keyCode === 13) {
+      window.location.href = '/' + sb.value;
+    }
+  });
+    </script>
+</body>
+</html>
