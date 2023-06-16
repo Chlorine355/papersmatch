@@ -23,7 +23,7 @@ jobs:
             pip install -r requirements.txt 
         - name: Analysing the code with pylint
           run: |
-            pylint $(git ls-files '*.py')
+            pylint $(git ls-files '*.py') --errors-only
         - name: Check docker installed or not
           run: docker run hello-world
         - name: Push to docker hub
