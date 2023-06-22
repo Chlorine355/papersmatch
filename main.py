@@ -2,8 +2,6 @@ from flask import Flask, render_template
 from get_related import get_related_papers, GraphVisualization
 import requests
 from concurrent.futures import ThreadPoolExecutor
-import networkx as nx
-from pprint import pprint
 
 
 app = Flask(__name__)
@@ -11,8 +9,6 @@ app = Flask(__name__)
 
 @app.route("/")
 def search_empty():
-    # r = requests.get(f"https://api.semanticscholar.org/graph/v1/paper/search?query={query}&offset=00&limit=20"
-    #                  "&fields=title,authors,year,fieldsOfStudy,abstract,citationCount")
     return render_template("search-empty.html")
 
 
@@ -26,7 +22,6 @@ def search(query):
 @app.route('/graph/<paper_id>')
 def graph(paper_id):
     G = GraphVisualization()
-
     origin, related_to_root_list = get_related_papers(paper_id)
     id_to_paper = {paper_id: origin}
     G.addNode(paper_id)
@@ -52,7 +47,7 @@ def graph(paper_id):
             del id_to_paper[key]
 
     years = sorted([article['year'] for article in id_to_paper.values() if article['year'] is not None])
-    # id_to_paper = связь ID со статьей id: {title, abstract, year, authors, citationCount, fieldsOfStudy}
+    # id_to_paper = связь ID со статьей id: {id, title, abstract, year, authors, citationCount, fieldsOfStudy}
     # gr = граф IDшек
     # node_list - список вершин (список ID)
     return render_template('graph.html', articles=id_to_paper.values(), edges=gr.edges, origin=origin, minyear=years[0],
