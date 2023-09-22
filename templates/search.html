@@ -1,47 +1,171 @@
-<html>
-<head>
-    <title>PapersMatch: {{query}}</title>
-    <script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
-    <script src='https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.25.0/cytoscape.min.js'></script>
-    <script src="https://unpkg.com/layout-base/layout-base.js"></script>
-    <script src="https://unpkg.com/cose-base/cose-base.js"></script>
-    <script src="https://unpkg.com/cytoscape-fcose/cytoscape-fcose.js"></script>
-    <link rel="stylesheet" href="/static/css/style.css">
-</head>
-
-<body>
-    <img src="/static/img/logo.png" class="logo">
-
+{% extends "base.html" %}
+{% block content %}
     <div class="search-results">
         <div class="searchbar">
                 <input type="text" id="search" placeholder="Статья, книга, автор, тема..." value="{{ query }}">
             <button id="sbutton">Найти</button>
         </div>
         <div class="results-caption">Результаты поиска для {{ query }}:</div>
-        {% for result in results %}
-        <div class="result">
-            <div class="title"><a href="/graph/{{result['paperId']}}">{{ result['title'] }}</a></div>
-            <span class="popup" data-popuptext="Источник"><a href="https://www.semanticscholar.org/paper/{{result['paperId']}}" id="article_link" target="_blank"><img src="/static/img/data-source.png" width="30" height="30"></a></span>
-            <div><span class="authors">{% for author in result['authors'] %} {{author['name']}} {% endfor %}</span></div>
-            <div>Год: <span class="year">{% if result['year'] %} {{result['year']}} {% endif %}</span></div>
-            <div><span class="fields">{% if result['fieldsOfStudy'] %} {% for field in result['fieldsOfStudy'] %} <span>{{field}}</span> {% endfor %} {% endif %}</span></div>
-            <div>Цитирования: <span class="ncitations">{{ result['citationCount'] }}</span></div>
-            <div class="abstract"><span class="abstract">{% if result['abstract'] %} {{result['abstract'].replace("\\u", "").replace("`", "'").replace("${", '')}} {% endif %}</span></div>
+        <div class="results-sections">
+            <div class="results-section">
+            {% for result in results[:count // 2] %}
+            <div class="result">
+                <div class="title"><a href="/graph/{{result['paperId']}}">{{ result['title'] }}</a></div>
+                <span class="popup" data-popuptext="Источник"><a href="https://www.semanticscholar.org/paper/{{result['paperId']}}" target="_blank"><img src="/static/img/data-source.png" width="30" height="30"></a></span>
+                {% if result['authors'] %}
+                <div class="result-paragraph">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="33" height="36" viewBox="0 0 33 36" fill="none">
+                      <path d="M23.4083 18.5587C24.3104 17.659 25.0258 16.59 25.5134 15.4129C26.001 14.2359 26.2512 12.974 26.2496 11.7C26.2496 6.34317 21.9064 2 16.5496 2C11.1928 2 6.84961 6.34317 6.84961 11.7C6.84961 14.3788 7.9352 16.8038 9.6909 18.5587" stroke="black" stroke-width="3" stroke-linecap="round"/>
+                      <path d="M2 34.3333L2.80833 30.2916L11.7 23.825L16.55 28.675L21.4 23.825L30.2917 30.2916L31.1 34.3333" stroke="black" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M7.65234 15.7478C7.66285 12.4255 8.20363 9.99809 9.27467 8.46711C10.8816 6.17063 12.0125 6.33957 12.8354 6.69686C13.6591 7.05495 14.1433 9.39184 15.5182 10.066C16.8924 10.7393 20.4119 10.8226 21.6171 11.6333C22.8215 12.4433 25.5779 13.9508 24.8909 16.5246" stroke="black" stroke-width="3"/>
+                    </svg>
+                    <span class="authors">{% for author in result['authors'] %} <a class="author" href="/{{author['name']}}/1">{{author['name']}}</a> {% endfor %}</span>
+                </div>
+                {% endif %}
+                {% if result['year'] %}
+                <div class="result-paragraph">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="35" height="36" viewBox="0 0 35 36" fill="none">
+                      <path d="M17.4993 3.41675C25.5537 3.41675 32.0827 9.94571 32.0827 18.0001C32.0827 26.0545 25.5537 32.5834 17.4993 32.5834C9.44497 32.5834 2.91602 26.0545 2.91602 18.0001C2.91602 9.94571 9.44497 3.41675 17.4993 3.41675ZM17.4993 6.33341C14.4052 6.33341 11.4377 7.56258 9.24977 9.7505C7.06185 11.9384 5.83268 14.9059 5.83268 18.0001C5.83268 21.0943 7.06185 24.0617 9.24977 26.2497C11.4377 28.4376 14.4052 29.6667 17.4993 29.6667C20.5935 29.6667 23.561 28.4376 25.7489 26.2497C27.9369 24.0617 29.166 21.0943 29.166 18.0001C29.166 14.9059 27.9369 11.9384 25.7489 9.7505C23.561 7.56258 20.5935 6.33341 17.4993 6.33341ZM17.4993 9.25008C17.8565 9.25013 18.2013 9.38127 18.4682 9.61862C18.7352 9.85598 18.9057 10.183 18.9475 10.5378L18.9577 10.7084V17.3963L22.9054 21.344C23.1669 21.6065 23.3188 21.9586 23.3301 22.329C23.3414 22.6993 23.2113 23.0601 22.9663 23.338C22.7212 23.6159 22.3796 23.7901 22.0107 23.8252C21.6419 23.8604 21.2735 23.7538 20.9804 23.5272L20.8433 23.4061L16.4683 19.0311C16.2417 18.8043 16.0961 18.509 16.0541 18.1911L16.041 18.0001V10.7084C16.041 10.3216 16.1947 9.95071 16.4682 9.67722C16.7416 9.40373 17.1126 9.25008 17.4993 9.25008Z" fill="black"/>
+                    </svg>
+                    <div><span class="year">{{result['year']}}</span></div>
+                </div>
+                {% endif %}
+                {% if result['fieldsOfStudy'] %}
+                <div class="result-paragraph">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="29" height="29" viewBox="0 0 29 29" fill="none">
+                      <path d="M2.9 5.8C2.13087 5.8 1.39325 6.10554 0.84939 6.64939C0.305535 7.19325 0 7.93087 0 8.7V26.1C0 27.695 1.305 29 2.9 29H20.3C21.0691 29 21.8068 28.6945 22.3506 28.1506C22.8945 27.6068 23.2 26.8691 23.2 26.1H2.9V5.8ZM26.1 0H8.7C7.93087 0 7.19325 0.305535 6.64939 0.84939C6.10554 1.39325 5.8 2.13087 5.8 2.9V20.3C5.8 21.0691 6.10554 21.8068 6.64939 22.3506C7.19325 22.8945 7.93087 23.2 8.7 23.2H26.1C26.8691 23.2 27.6068 22.8945 28.1506 22.3506C28.6945 21.8068 29 21.0691 29 20.3V2.9C29 2.13087 28.6945 1.39325 28.1506 0.84939C27.6068 0.305535 26.8691 0 26.1 0ZM18.85 20.3H8.7V10.15H18.85V20.3ZM26.1 20.3H21.75V10.15H26.1V20.3ZM26.1 7.25H8.7V2.9H26.1V7.25Z" fill="black"/>
+                    </svg>
+                    <span class="fields">{% for field in result['fieldsOfStudy'] %} <span class="fieldOfStudy">{{field}}</span> {% endfor %}</span>
+                </div>
+                {% endif %}
+
+                <div class="result-paragraph">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="31" height="31" viewBox="0 0 31 31" fill="none">
+                      <path d="M2 28.598H7.69938L28.598 7.69938L22.8979 2L2 22.8986V28.598Z" stroke="black" stroke-width="3" stroke-linejoin="round"/>
+                      <path d="M17.1992 7.69946L22.8986 13.3988" stroke="black" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <div>Цитирования: <span class="ncitations">{{ result['citationCount'] }}</span></div>
+                </div>
+                {% if result['abstract'] %}
+                <div class="result-paragraph">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="29" height="36" viewBox="0 0 29 36" fill="none">
+                      <path d="M27.6818 0H5.27273C3.87431 0 2.53317 0.583514 1.54435 1.62218C0.555518 2.66084 0 4.06957 0 5.53846V34.6154C0 34.9826 0.13888 35.3348 0.386087 35.5945C0.633294 35.8541 0.968578 36 1.31818 36H25.0455C25.3951 36 25.7303 35.8541 25.9776 35.5945C26.2248 35.3348 26.3636 34.9826 26.3636 34.6154C26.3636 34.2482 26.2248 33.896 25.9776 33.6363C25.7303 33.3766 25.3951 33.2308 25.0455 33.2308H2.63636C2.63636 32.4963 2.91412 31.792 3.40854 31.2726C3.90295 30.7533 4.57352 30.4615 5.27273 30.4615H27.6818C28.0314 30.4615 28.3667 30.3157 28.6139 30.056C28.8611 29.7963 29 29.4441 29 29.0769V1.38462C29 1.01739 28.8611 0.66521 28.6139 0.405544C28.3667 0.145879 28.0314 0 27.6818 0ZM26.3636 27.6923H5.27273C4.34694 27.691 3.43733 27.9472 2.63636 28.4348V5.53846C2.63636 4.80402 2.91412 4.09965 3.40854 3.58032C3.90295 3.06099 4.57352 2.76923 5.27273 2.76923H26.3636V27.6923Z" fill="black"/>
+                    </svg>
+                    <div class="abstract"><span class="abstract">{{result['abstract'].replace("\\u", "").replace("`", "'").replace("${", '')}}</span></div>
+                </div>
+                 {% endif %}
+            </div>
+            {% endfor %}
+            </div>
+
+            <div class="results-section">
+            {% for result in results[count // 2:] %}
+            <div class="result">
+                <div class="title"><a href="/graph/{{result['paperId']}}">{{ result['title'] }}</a></div>
+                <span class="popup" data-popuptext="Источник"><a href="https://www.semanticscholar.org/paper/{{result['paperId']}}" target="_blank"><img src="/static/img/data-source.png" width="30" height="30"></a></span>
+                {% if result['authors'] %}
+                <div class="result-paragraph">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="33" height="36" viewBox="0 0 33 36" fill="none">
+                      <path d="M23.4083 18.5587C24.3104 17.659 25.0258 16.59 25.5134 15.4129C26.001 14.2359 26.2512 12.974 26.2496 11.7C26.2496 6.34317 21.9064 2 16.5496 2C11.1928 2 6.84961 6.34317 6.84961 11.7C6.84961 14.3788 7.9352 16.8038 9.6909 18.5587" stroke="black" stroke-width="3" stroke-linecap="round"/>
+                      <path d="M2 34.3333L2.80833 30.2916L11.7 23.825L16.55 28.675L21.4 23.825L30.2917 30.2916L31.1 34.3333" stroke="black" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M7.65234 15.7478C7.66285 12.4255 8.20363 9.99809 9.27467 8.46711C10.8816 6.17063 12.0125 6.33957 12.8354 6.69686C13.6591 7.05495 14.1433 9.39184 15.5182 10.066C16.8924 10.7393 20.4119 10.8226 21.6171 11.6333C22.8215 12.4433 25.5779 13.9508 24.8909 16.5246" stroke="black" stroke-width="3"/>
+                    </svg>
+                    <span class="authors">{% for author in result['authors'] %} <a class="author" href="/{{author['name']}}/1">{{author['name']}}</a> {% endfor %}</span>
+                </div>
+                {% endif %}
+                {% if result['year'] %}
+                <div class="result-paragraph">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="35" height="36" viewBox="0 0 35 36" fill="none">
+                      <path d="M17.4993 3.41675C25.5537 3.41675 32.0827 9.94571 32.0827 18.0001C32.0827 26.0545 25.5537 32.5834 17.4993 32.5834C9.44497 32.5834 2.91602 26.0545 2.91602 18.0001C2.91602 9.94571 9.44497 3.41675 17.4993 3.41675ZM17.4993 6.33341C14.4052 6.33341 11.4377 7.56258 9.24977 9.7505C7.06185 11.9384 5.83268 14.9059 5.83268 18.0001C5.83268 21.0943 7.06185 24.0617 9.24977 26.2497C11.4377 28.4376 14.4052 29.6667 17.4993 29.6667C20.5935 29.6667 23.561 28.4376 25.7489 26.2497C27.9369 24.0617 29.166 21.0943 29.166 18.0001C29.166 14.9059 27.9369 11.9384 25.7489 9.7505C23.561 7.56258 20.5935 6.33341 17.4993 6.33341ZM17.4993 9.25008C17.8565 9.25013 18.2013 9.38127 18.4682 9.61862C18.7352 9.85598 18.9057 10.183 18.9475 10.5378L18.9577 10.7084V17.3963L22.9054 21.344C23.1669 21.6065 23.3188 21.9586 23.3301 22.329C23.3414 22.6993 23.2113 23.0601 22.9663 23.338C22.7212 23.6159 22.3796 23.7901 22.0107 23.8252C21.6419 23.8604 21.2735 23.7538 20.9804 23.5272L20.8433 23.4061L16.4683 19.0311C16.2417 18.8043 16.0961 18.509 16.0541 18.1911L16.041 18.0001V10.7084C16.041 10.3216 16.1947 9.95071 16.4682 9.67722C16.7416 9.40373 17.1126 9.25008 17.4993 9.25008Z" fill="black"/>
+                    </svg>
+                    <div><span class="year">{{result['year']}}</span></div>
+                </div>
+                {% endif %}
+                {% if result['fieldsOfStudy'] %}
+                <div class="result-paragraph">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="29" height="29" viewBox="0 0 29 29" fill="none">
+                      <path d="M2.9 5.8C2.13087 5.8 1.39325 6.10554 0.84939 6.64939C0.305535 7.19325 0 7.93087 0 8.7V26.1C0 27.695 1.305 29 2.9 29H20.3C21.0691 29 21.8068 28.6945 22.3506 28.1506C22.8945 27.6068 23.2 26.8691 23.2 26.1H2.9V5.8ZM26.1 0H8.7C7.93087 0 7.19325 0.305535 6.64939 0.84939C6.10554 1.39325 5.8 2.13087 5.8 2.9V20.3C5.8 21.0691 6.10554 21.8068 6.64939 22.3506C7.19325 22.8945 7.93087 23.2 8.7 23.2H26.1C26.8691 23.2 27.6068 22.8945 28.1506 22.3506C28.6945 21.8068 29 21.0691 29 20.3V2.9C29 2.13087 28.6945 1.39325 28.1506 0.84939C27.6068 0.305535 26.8691 0 26.1 0ZM18.85 20.3H8.7V10.15H18.85V20.3ZM26.1 20.3H21.75V10.15H26.1V20.3ZM26.1 7.25H8.7V2.9H26.1V7.25Z" fill="black"/>
+                    </svg>
+                    <span class="fields">{% for field in result['fieldsOfStudy'] %} <span class="fieldOfStudy">{{field}}</span> {% endfor %}</span>
+                </div>
+                {% endif %}
+
+                <div class="result-paragraph">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="31" height="31" viewBox="0 0 31 31" fill="none">
+                      <path d="M2 28.598H7.69938L28.598 7.69938L22.8979 2L2 22.8986V28.598Z" stroke="black" stroke-width="3" stroke-linejoin="round"/>
+                      <path d="M17.1992 7.69946L22.8986 13.3988" stroke="black" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <div>Цитирования: <span class="ncitations">{{ result['citationCount'] }}</span></div>
+                </div>
+                {% if result['abstract'] %}
+                <div class="result-paragraph">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="29" height="36" viewBox="0 0 29 36" fill="none">
+                      <path d="M27.6818 0H5.27273C3.87431 0 2.53317 0.583514 1.54435 1.62218C0.555518 2.66084 0 4.06957 0 5.53846V34.6154C0 34.9826 0.13888 35.3348 0.386087 35.5945C0.633294 35.8541 0.968578 36 1.31818 36H25.0455C25.3951 36 25.7303 35.8541 25.9776 35.5945C26.2248 35.3348 26.3636 34.9826 26.3636 34.6154C26.3636 34.2482 26.2248 33.896 25.9776 33.6363C25.7303 33.3766 25.3951 33.2308 25.0455 33.2308H2.63636C2.63636 32.4963 2.91412 31.792 3.40854 31.2726C3.90295 30.7533 4.57352 30.4615 5.27273 30.4615H27.6818C28.0314 30.4615 28.3667 30.3157 28.6139 30.056C28.8611 29.7963 29 29.4441 29 29.0769V1.38462C29 1.01739 28.8611 0.66521 28.6139 0.405544C28.3667 0.145879 28.0314 0 27.6818 0ZM26.3636 27.6923H5.27273C4.34694 27.691 3.43733 27.9472 2.63636 28.4348V5.53846C2.63636 4.80402 2.91412 4.09965 3.40854 3.58032C3.90295 3.06099 4.57352 2.76923 5.27273 2.76923H26.3636V27.6923Z" fill="black"/>
+                    </svg>
+                    <div class="abstract"><span class="abstract">{{result['abstract'].replace("\\u", "").replace("`", "'").replace("${", '')}}</span></div>
+                </div>
+                 {% endif %}
+            </div>
+            {% endfor %}
+            </div>
         </div>
-        {% endfor %}
+        <div class="pagination">
+            {% if page > 3 %}
+            <a href="/{{query}}/1">
+                <img src="/static/img/flag.png" class="pagination-img">
+            </a>
+            {% endif  %}
+
+            {% for i in pages_array %}
+                {% if page == i %}
+                    <div class="current-page"><span>{{i}}</span></div>
+                {% else %}
+                    <a href="/{{query}}/{{i}}"><span>{{i}}</span></a>
+                {% endif %}
+            {% endfor %}
+
+
+            {% if page < total_pages %}
+            <a href="/{{query}}/{{page+1}}">
+                <img src="/static/img/right-arrow.png" class="pagination-img">
+            </a>
+            {% endif  %}
+        </div>
     </div>
     <script>
         let sb = document.getElementById("search");
         let btn = document.getElementById("sbutton");
         btn.onclick = function () {
-            window.location.href = '/' + sb.value;
+            if (sb.value) {
+                window.location.href = '/' + sb.value + '/1';
+            }
         }
-
         sb.addEventListener('keydown', function(e) {
     if (e.keyCode === 13) {
-      window.location.href = '/' + sb.value;
+      if (sb.value) {
+                window.location.href = '/' + sb.value + '/1';
+            }
     }
   });
     </script>
+<div id="scroll-button">
+<!--svg width="64px" height="64px" viewBox="0 0 24.00 24.00" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#FFC727" stroke-width="0.00024000000000000003"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round" stroke="#CCCCCC" stroke-width="0.24000000000000005"></g><g id="SVGRepo_iconCarrier"> <path fill-rule="evenodd" clip-rule="evenodd" d="M12 3C12.2652 3 12.5196 3.10536 12.7071 3.29289L19.7071 10.2929C20.0976 10.6834 20.0976 11.3166 19.7071 11.7071C19.3166 12.0976 18.6834 12.0976 18.2929 11.7071L13 6.41421V20C13 20.5523 12.5523 21 12 21C11.4477 21 11 20.5523 11 20V6.41421L5.70711 11.7071C5.31658 12.0976 4.68342 12.0976 4.29289 11.7071C3.90237 11.3166 3.90237 10.6834 4.29289 10.2929L11.2929 3.29289C11.4804 3.10536 11.7348 3 12 3Z" fill="#FFC727"></path> </g></svg-->
+    <img src="/static/img/up-nav.png" style="height: 51px;
+    padding-bottom: 8px">
+</div>
+
+<script>
+    var scrollbutton = document.getElementById("scroll-button");
+    scrollbutton.addEventListener("click", () => {window.scrollTo({top: 0, behavior: 'smooth'})});
+
+    window.addEventListener("scroll", () => {
+      if (window.pageYOffset > 100) {
+        scrollbutton.classList.add("active");
+      } else {
+        scrollbutton.classList.remove("active");
+      }
+    });
+</script>
 </body>
 </html>
+{% endblock %}

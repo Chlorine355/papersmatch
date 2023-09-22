@@ -1,0 +1,41 @@
+<html>
+<head>
+    <title>{{ title }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.25.0/cytoscape.min.js'></script>
+    <script src="https://unpkg.com/layout-base/layout-base.js"></script>
+    <script src="https://unpkg.com/cose-base/cose-base.js"></script>
+    <script src="https://unpkg.com/cytoscape-fcose/cytoscape-fcose.js"></script>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/mobile.css">
+</head>
+
+<body>
+    <!--img src="/static/img/logo.png" class="logo"-->
+    <div class="header">
+        <span style="background-color: #FFC727" class="hover-name logo"><a href="/">PapersMatch</a></span>
+        {% if searchbar %}
+        <div class="searchbar">
+                <input type="text" id="search" placeholder="Статья, книга, автор, тема...">
+            <button id="sbutton">Найти</button>
+        </div>
+        <script>
+                    let sb = document.getElementById("search");
+        let btn = document.getElementById("sbutton");
+        btn.onclick = function () {
+            if (sb.value) {
+                window.location.href = '/' + sb.value + '/1';
+            }
+        }
+        sb.addEventListener('keydown', function(e) {
+    if (e.keyCode === 13) {
+      if (sb.value) {
+                window.location.href = '/' + sb.value + '/1';
+            }
+    }
+  });
+        </script>
+        {% endif %}
+    </div>
+    {% block content %} {% endblock %}

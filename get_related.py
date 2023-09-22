@@ -54,5 +54,7 @@ class GraphVisualization:
                     G.add_edges_from(self.visual)
                     continue
                 break
-
+        T = nx.algorithms.minimum_spanning_tree(G)
+        G.clear()
+        G.add_edges_from(T.edges())
         return G

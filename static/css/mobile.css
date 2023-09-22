@@ -1,0 +1,109 @@
+@media (max-width: 900px) {
+       .search-results {
+            width: 100vw;
+            padding-top: 40px;
+       }
+
+       .results-caption {
+            width: 90%;
+            font-size: 30px;
+       }
+
+       .results-section {
+            width: 90%;
+       }
+
+       .results-sections {
+           flex-direction: column;
+           align-items: center;
+       }
+
+       #search {
+            /*margin-bottom: 50px;*/
+       }
+
+       .searchbar {
+            width: 80vw;
+       }
+
+       .welcome {
+            padding-bottom: 30px;
+       }
+
+       .welcome span {
+            font-size: 20px;
+       }
+
+       .subtext {
+            width: 80%;
+            margin: 0 auto;
+       }
+
+       .plane > img {
+            width: 30%
+       }
+
+       .plane.left {
+            bottom: 10px;
+       }
+
+       .pagination {
+            margin-bottom: 30px;
+       }
+
+       .pagination > a {
+            width: 30px;
+            height: 30px;
+       }
+
+       .pagination-img {
+            width: 16px;
+       }
+
+       .current-page {
+            width: 20px;
+            height: 20px;
+       }
+
+       .right-panel {
+            right: 20px;
+            left: 20px;
+            top: auto;
+            height: 300px;
+            width: auto;
+       }
+
+       .yearbar {
+            right: 20px;
+            bottom: 380px;
+            pointer-events: none;
+       }
+
+       .header {
+            justify-content: center;
+       }
+
+       .header > .logo:has(+.searchbar) {
+            display: none;
+       }
+
+       .mobile-warning {
+            display: flex;
+            width: fit-content;
+            margin: 0 auto;
+            align-items: center;
+            gap: 15px;
+            justify-content: space-between;
+            border: 1px solid black;
+            border-radius: 5px;
+            padding: 5px;
+            margin-top: 30px;
+       }
+
+       .warning-text {
+            font-size: 12px;
+            width: 80px;
+       }
+
+}
+

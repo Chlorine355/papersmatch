@@ -1,27 +1,16 @@
-<html>
-<head>
-    <title>Граф для {{ origin['title'] }}</title>
-    <script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
-    <script src='https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.25.0/cytoscape.min.js'></script>
-    <script src="https://unpkg.com/layout-base/layout-base.js"></script>
-    <script src="https://unpkg.com/cose-base/cose-base.js"></script>
-    <script src="https://unpkg.com/cytoscape-fcose/cytoscape-fcose.js"></script>
-    <link rel="stylesheet" href="/static/css/style.css">
-</head>
+{% extends "base.html" %}
+{% block content %}
 
-<style>
-    #cy {
-        width: 100%;
-        height: 100%;
-        position: absolute;
-        top: 0px;
-        left: 0px;
-    }
-</style>
-
-<body>
+    <style>
+        #cy {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0px;
+            left: 0px;
+        }
+    </style>
     <div id="cy"></div>
-    <img src="/static/img/logo.png" class="logo">
     <div class="yearbar" style="">
         <span>{{minyear}}</span>
         <span>{{maxyear}}</span>
@@ -30,11 +19,11 @@
         <div><span id="title">{{ origin['title'] }}</span></div>
         <span class="popup" data-popuptext="Источник"><a href="https://www.semanticscholar.org/paper/{{origin['paperId']}}" id="article_link" target="_blank"><img src="/static/img/data-source.png" width="32" height="32"></a></span>
         <span class="popup" data-popuptext="Построить граф"><a href="/graph/{{origin['paperId']}}" id="build_graph"><img src="/static/img/graph.png" width="32" height="32"></a></span>
-        <div><span id="authors">{% for author in origin['authors'] %} {{author['name']}} {% endfor %}</span></div>
-        <div>Год: <span id="year">{% if origin['year'] %} {{origin['year']}} {% endif %}</span></div>
-        <div><span id="fields">{% if origin['fieldsOfStudy'] %} {% for field in origin['fieldsOfStudy'] %} <span>{{field}}</span> {% endfor %} {% endif %}</span></div>
-        <div>Цитирования: <span id="ncitations">{{ origin['citationCount'] }}</span></div>
-        <div><span id="abstract">{% if origin['abstract'] %} {{origin['abstract'].replace("\\u", "").replace("`", "'")}} {% endif %}</span></div>
+        <div class="right-panel_property">Авторы: <span id="authors">{% for author in origin['authors'] %} <a class="author" href="/{{author['name']}}/1">{{author['name']}}</a> {% endfor %}</span></div>
+        <div class="right-panel_property">Год: <span id="year">{% if origin['year'] %} {{origin['year']}} {% endif %}</span></div>
+        <div class="right-panel_property">Области знания: <span id="fields">{% if origin['fieldsOfStudy'] %} {% for field in origin['fieldsOfStudy'] %} <span class="fieldOfStudy">{{field}}</span> {% endfor %} {% endif %}</span></div>
+        <div class="right-panel_property">Цитирования: <span id="ncitations">{{ origin['citationCount'] }}</span></div>
+        <div class="right-panel_property"><span id="abstract">{% if origin['abstract'] %} {{origin['abstract'].replace("\\u", "").replace("`", "'")}} {% endif %}</span></div>
     </div>
 
     <script>
@@ -76,11 +65,13 @@
           'label': 'data(title)',
           'width': 'mapData(citationCount,0,500,200,400)',
           'height': 'mapData(citationCount,0,500,200,400)',
-          'font-size': '50px',
+          'font-size': '80px',
           'font-family': 'system-ui',
-          'background-color': 'mapData(year,{{ minyear }},{{ maxyear }},#AAA, blue)',
+          'background-color': 'mapData(year,{{ minyear }},{{ maxyear }},#F6E9B5, #FD9502)',
           'text-wrap': 'wrap',
-          'text-max-width': '800px',
+          'text-valign': 'center',
+          'text-max-width': '1200px',
+          'border-width': '2px',
         }
       }, {
         selector: 'edge',
@@ -124,24 +115,43 @@
         {
             selector: 'node.tapped',
             style: {
-                'font-size': '50px',
+                'font-size': '90px',
             }
         },
     ]
   });
-  cy.layout({name: 'circle',   idealEdgeLength: edge => 500, radius: 1000, startAngle: -1/3 * Math.PI, animate: true}).run();
-  cy.elements().getElementById(origin['id']).style('shape', 'octagon');
+  // cy.on('layoutstop', ()=>{cy.elements().shift('x', -2000);console.log('ready');});
+  cy.layout({name: 'fcose',   idealEdgeLength: edge => 1200, startAngle: -1/3 * Math.PI, animate: true, nodeRepulsion: node => 60000000, stop: () => {
+    cy.nodes().layout({name: 'preset', animate: true, fit: false, transform: (node) => {
+        let position = {};
+        if (window.screen.width > 900) {
+            position.x = node.position('x') - 1500;
+            position.y = node.position('y');
+        } else {
+            position.x = node.position('x');
+            position.y = node.position('y')  -3500;
+        }
+        return position;
+    }
+    }).run();}}).run();
+  cy.elements().getElementById(origin['id']).style('background-color', 'white');
+  cy.elements().getElementById(origin['id']).style('border-width', '20px');
+  cy.elements().getElementById(origin['id']).style('border-color', '#FFC727');
   let main = cy.elements().getElementById(origin['id']);
   cy.on('mouseover', 'node', function(e){
     var sel = e.target;
 
 
     document.getElementById("title").innerHTML = sel.data()['title'];
-    document.getElementById("authors").innerHTML = sel.data()['authors'].join(" ");
+    document.getElementById("authors").innerHTML = '';
+    for (let author of sel.data()['authors']) {
+        document.getElementById("authors").innerHTML += '<a class="author" href="/' + author + '/1">' + author + '</a>';
+    }
+    // document.getElementById("authors").innerHTML = '<span class="author">' + sel.data()['authors'].join('</span><span class="author">') + '</span>';
     document.getElementById("year").innerHTML = sel.data()['year'];
     document.getElementById("ncitations").innerHTML = sel.data()['citationCount'];
     document.getElementById("abstract").innerHTML = sel.data()['abstract'];
-    document.getElementById("fields").innerHTML = sel.data()['fields'].join(", ");
+    document.getElementById("fields").innerHTML = '<span class="fieldOfStudy">' + sel.data()['fields'].join('</span><span class="fieldOfStudy">') + '</span>';
     document.getElementById("article_link").href = "https://www.semanticscholar.org/paper/" + sel.data()['id'];
     document.getElementById("build_graph").href = "/graph/" + sel.data()['id'];
 
@@ -154,11 +164,14 @@
 
 
     document.getElementById("title").innerHTML = main.data()['title'];
-    document.getElementById("authors").innerHTML = main.data()['authors'].join(" ");
+    document.getElementById("authors").innerHTML = '';
+    for (let author of main.data()['authors']) {
+        document.getElementById("authors").innerHTML += '<a class="author" href="/' + author + '/1">' + author + '</a>';
+    }
     document.getElementById("year").innerHTML = main.data()['year'];
     document.getElementById("ncitations").innerHTML = main.data()['citationCount'];
     document.getElementById("abstract").innerHTML = main.data()['abstract'];
-    document.getElementById("fields").innerHTML = main.data()['fields'].join(", ");
+    document.getElementById("fields").innerHTML = '<span class="fieldOfStudy">' + main.data()['fields'].join('</span><span class="fieldOfStudy">') + '</span>';
     document.getElementById("article_link").href = "https://www.semanticscholar.org/paper/" + main.data()['id'];
     document.getElementById("build_graph").href = "/graph/" + main.data()['id'];
 
@@ -173,11 +186,14 @@
 
 
     document.getElementById("title").innerHTML = sel.data()['title'];
-    document.getElementById("authors").innerHTML = sel.data()['authors'].join(" ");
+    document.getElementById("authors").innerHTML = '';
+    for (let author of sel.data()['authors']) {
+        document.getElementById("authors").innerHTML += '<a class="author" href="/' + author + '/1">' + author + '</a>';
+    }
     document.getElementById("year").innerHTML = sel.data()['year'];
     document.getElementById("ncitations").innerHTML = sel.data()['citationCount'];
     document.getElementById("abstract").innerHTML = sel.data()['abstract'];
-    document.getElementById("fields").innerHTML = sel.data()['fields'].join(", ");
+    document.getElementById("fields").innerHTML = '<span class="fieldOfStudy">' + sel.data()['fields'].join('</span><span class="fieldOfStudy">') + '</span>';
     document.getElementById("article_link").href = "https://www.semanticscholar.org/paper/" + sel.data()['id'];
     document.getElementById("build_graph").href = "/graph/" + sel.data()['id'];
     main = sel;
@@ -189,3 +205,4 @@
     </script>
 </body>
 </html>
+{% endblock %}
